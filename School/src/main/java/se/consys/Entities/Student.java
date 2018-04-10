@@ -17,6 +17,7 @@ public class Student implements Serializable {
 	private String firstName;
 	private String lastName;
 	private String email;
+	private String password;
 	@ManyToMany(mappedBy = "students")
 	private List<Course> courses;
 	

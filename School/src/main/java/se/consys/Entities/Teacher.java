@@ -19,6 +19,7 @@ public class Teacher implements Serializable {
 	private String lastName;
 	private String email;
 	private String phoneNumber;
+	private String password;
 	@ManyToMany(mappedBy = "qualifiedTeachers")
 	private Set<Subject> qualifications;
 	@OneToMany

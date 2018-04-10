@@ -14,12 +14,12 @@ import se.consys.services.GenericService;
 
 public class App {
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		Session session = HibernateUtility.getSessionFactory().openSession();
 		
-		GenericService teacherService = GenericService.getGenericService(new DaoGenericHibernateImpl(Teacher.class));
-		GenericService studentService = GenericService.getGenericService(new DaoGenericHibernateImpl(Student.class));
+		GenericService teacherService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Teacher.class));
+		GenericService studentService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Student.class));
 		Teacher t = new Teacher();
 //		t.setEmail("mart.nilss@gmail.com");
 //		t.setFirstName("Martin");
@@ -29,8 +29,7 @@ public class App {
 		s.setFirstName("studenttest2");
 		t.setFirstName("teachertest2");
 		
-		teacherService.create(s);
-		studentService.create(t);
+		teacherService.create(t);
 	
 		
   
