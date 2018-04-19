@@ -20,12 +20,14 @@ import org.hibernate.LazyInitializationException;
 
 import se.consys.Entities.Teacher;
 import se.consys.dataaccess.DaoGenericHibernateImpl;
+import se.consys.filters.JWTRequired;
 import se.consys.services.GenericService;
 import se.consys.viewmodels.TeacherViewModel;
 
 @Path("teachers")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@JWTRequired
 public class TeacherController {
 	
 	private GenericService teacherService;
