@@ -1,16 +1,19 @@
 package se.consys.dataaccess;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import org.hibernate.Session;
 
+import se.consys.Utilities.Helper;
 import se.consys.Utilities.HibernateUtility;
 import se.consys.services.GenericService;
 
 public class DaoGenericHibernateImpl<T extends Serializable> implements IGenericDao<T> {
 
-	private Session session = HibernateUtility.getSessionFactory().openSession();
+	Session session = HibernateUtility.getSessionFactory().openSession();
 	private String activeClassName;
 	private String wrongClassError = "ERROR: Wrong class used on the established service.";
 	
@@ -35,7 +38,7 @@ public class DaoGenericHibernateImpl<T extends Serializable> implements IGeneric
 	public T update(T entity) {
 		if (entity.getClass().getSimpleName().equals(activeClassName)) {
 			session.beginTransaction();
-			session.merge(entity);
+			session.merge(entity);  
 			session.getTransaction().commit();
 			return entity;
 		} else {
@@ -49,8 +52,10 @@ public class DaoGenericHibernateImpl<T extends Serializable> implements IGeneric
 	@Override
 	public void delete(T entity) {
 		if (entity.getClass().getSimpleName().equals(activeClassName)) {
-			session.beginTransaction();
+			session.beginTransaction().begin();
+			//session.update(entity);
 			session.delete(entity);
+
 			session.getTransaction().commit();
 		} else {
 			System.out.println(wrongClassError + " Entity has not been deleted. "
@@ -79,5 +84,15 @@ public class DaoGenericHibernateImpl<T extends Serializable> implements IGeneric
 		List<T> result = (List<T>) session.createQuery(HQL_FIND_ALL)
 			.getResultList();
 		return  result;
+	}
+
+	@Override
+	public void removeReference(T entity, Class<?> reference) {
+		Method setter = Helper.findSetter(entity, reference);
+		try {
+			setter.invoke(entity, null);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new RuntimeException(e.getMessage());
+		}
 	}
 }

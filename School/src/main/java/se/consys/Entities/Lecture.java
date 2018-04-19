@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -28,6 +29,13 @@ public class Lecture implements Serializable {
 		joinColumns = @JoinColumn(name="Lecture_Id", referencedColumnName="id"),
 		inverseJoinColumns = @JoinColumn(name="Teacher_Id", referencedColumnName="id"))
 	private Set<Teacher> teachers;
+	
+	public Lecture() {}
+	
+	public Lecture(LocalDateTime timeOfLecture, String lectureRoom) {
+		this.setTimeOfLecture(timeOfLecture);
+		this.setLectureRoom(lectureRoom);
+	}
 	
 	public Set<Teacher> getTeachers() {
 		return teachers;

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -20,6 +21,15 @@ public class Student implements Serializable {
 	private String password;
 	@ManyToMany(mappedBy = "students")
 	private List<Course> courses;
+	
+	public Student() {}
+	
+	public Student(String firstName, String lastName, String email, String password) {
+		this.setFirstName(firstName);
+		this.setLastName(lastName);
+		this.setEmail(email);
+		this.setPassword(password);
+	}
 	
 	public List<Course> getCourses() {
 		return courses;
@@ -50,5 +60,13 @@ public class Student implements Serializable {
 	}
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 }
