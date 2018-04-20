@@ -52,7 +52,7 @@ public class DaoGenericHibernateImpl<T extends Serializable> implements IGeneric
 	@Override
 	public void delete(T entity) {
 		if (entity.getClass().getSimpleName().equals(activeClassName)) {
-			session.beginTransaction().begin();
+			session.beginTransaction();
 			//session.update(entity);
 			session.delete(entity);
 

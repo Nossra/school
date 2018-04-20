@@ -1,4 +1,8 @@
 package se.consys.Entities;
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import java.io.Serializable;
 import java.time.LocalDate;

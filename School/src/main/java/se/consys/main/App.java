@@ -2,6 +2,7 @@ package se.consys.main;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,15 +22,16 @@ public class App {
 
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
-		Session session = HibernateUtility.getSessionFactory().openSession();
+//		Session session = HibernateUtility.getSessionFactory().openSession();
 		
-		GenericService teacherService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Teacher.class));
-		GenericService studentService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Student.class));
-		GenericService lectureService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Lecture.class));
-		GenericService subjectService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Subject.class));
-		GenericService courseService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Course.class));
-
-			
+//		GenericService teacherService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Teacher.class));
+//		GenericService studentService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Student.class));
+//		GenericService lectureService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Lecture.class));
+//		GenericService subjectService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Subject.class));
+//		GenericService courseService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Course.class));
+		
+		
+					
 	} 
 
 }
