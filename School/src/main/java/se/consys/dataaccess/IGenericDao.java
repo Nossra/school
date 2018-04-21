@@ -9,4 +9,7 @@ public interface IGenericDao<T extends Serializable>  {
 	void delete(T entity);
 	T findById(int id);
 	List<T> findAll();
+	
+	// might you delete it later :)
+	void removeReference(T entity, Class<?> reference);
 }

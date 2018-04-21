@@ -51,4 +51,9 @@ public class GenericService<T extends Serializable> implements IGenericDao<T> {
 		this.dao = dao;
 	}
 
+	@Override
+	public void removeReference(T entity, Class<?> reference) {
+		this.dao.removeReference(entity, reference);
+	}
+
 }

@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet Filter implementation class CorsFilter
@@ -33,10 +34,15 @@ public class CorsFilter implements Filter {
 	 * @see Filter#doFilter(ServletRequest, ServletResponse, FilterChain)
 	 */
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-		// TODO Auto-generated method stub
-		// place your code here
-
-		// pass the request along the filter chain
+		HttpServletResponse res = (HttpServletResponse) response;
+		String origin = res.getHeader("Access-Control-Allow-Origin"); 
+		
+		if (origin == null) {
+			res.addHeader("Access-Control-Allow-Origin", "http://localhost:4200");
+			res.addHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Origin, Authorization");
+			res.addHeader("Access-Control-Allow-Methods", "POST, GET, PUT, PATCH, DELETE");
+		}
+		
 		chain.doFilter(request, response);
 	}
 

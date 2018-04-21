@@ -3,7 +3,9 @@ package se.consys.Entities;
 import java.io.Serializable;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -20,12 +22,29 @@ public class Teacher implements Serializable {
 	private String email;
 	private String phoneNumber;
 	private String password;
-	@ManyToMany(mappedBy = "qualifiedTeachers")
+	@ManyToMany(cascade = CascadeType.ALL, mappedBy = "qualifiedTeachers")
 	private Set<Subject> qualifications;
 	@OneToMany
 	private Set<Course> supervisedCourses;
-	@ManyToMany(mappedBy = "teachers")
+	@ManyToMany(cascade = CascadeType.ALL, mappedBy = "teachers")
 	private Set<Lecture> lectures;
+	
+	public Teacher() { 
+		
+	}
+	
+	public Teacher(
+			String firstName,
+			String lastName,
+			String email, 
+			String phoneNumber,
+			String password) {
+		this.setFirstName(firstName);
+		this.setLastName(lastName);
+		this.setEmail(email);
+		this.setPhoneNumber(phoneNumber);
+		this.setPassword(password);
+	}
 	
 	public Set<Lecture> getLectures() {
 		return lectures;
@@ -74,5 +93,13 @@ public class Teacher implements Serializable {
 	}
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 }

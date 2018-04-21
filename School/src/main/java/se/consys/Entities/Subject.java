@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Set;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -23,6 +24,12 @@ public class Subject implements Serializable {
 		joinColumns = @JoinColumn(name="Subject_Id", referencedColumnName="id"),
 		inverseJoinColumns = @JoinColumn(name="Teacher_Id", referencedColumnName="id"))
 	private Set<Teacher> qualifiedTeachers;
+	
+	public Subject() {}
+	
+	public Subject(String subjectName) {
+		this.setSubjectName(subjectName);
+	}
 	
 	public Set<Teacher> getQualifiedTeachers() {
 		return qualifiedTeachers;

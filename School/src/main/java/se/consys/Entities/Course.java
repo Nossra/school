@@ -1,4 +1,8 @@
 package se.consys.Entities;
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -7,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -36,6 +41,21 @@ public class Course implements Serializable {
 		joinColumns = @JoinColumn(name="Course_Id", referencedColumnName="id"),
 		inverseJoinColumns = @JoinColumn(name="Student_Id", referencedColumnName="id"))
 	private List<Student> students;
+	
+	public Course() {}
+	
+	public Course(
+			String courseName,
+			LocalDateTime timeStamp,
+			LocalDate startDate,
+			LocalDate endDate,
+			int durationInMonths) {
+		this.setCourseName(courseName);
+		this.setTimeStamp(timeStamp);
+		this.setStartDate(startDate);
+		this.setEndDate(endDate);
+		this.setDurationInMonths(durationInMonths);;
+	}
 	
 	public List<Student> getStudents() {
 		return students;
