@@ -75,18 +75,19 @@ public class CourseController {
 			@DefaultValue("0") @PathParam("id") int id,
 			@DefaultValue("null") @QueryParam("name") String courseName,
 			@DefaultValue("-1") @QueryParam("duration") int durationInMonths,
-			@DefaultValue("") @QueryParam("end") LocalDateParam endDate)
-//			@DefaultValue("null") @QueryParam("start") LocalDate startDate,
+			@DefaultValue("") @QueryParam("end") LocalDateParam endDate,
+			@DefaultValue("") @QueryParam("start") LocalDateParam startDate)
 //			@DefaultValue("null") @QueryParam("timestamp") LocalDateTime timeStamp,
 //			@DefaultValue("null") @QueryParam("lectures") Map<LocalDateTime, Lecture> scheduledLectures,
 //			@DefaultValue("null") @QueryParam("students") List<Student> students,
 //			@DefaultValue("null") @QueryParam("supervisor") Teacher supervisor)
 			{
 		Course courseToBeUpdated = (Course) courseService.findById(id);	
+		System.out.println(courseName);
 		if (courseName != null) courseToBeUpdated.setCourseName(courseName);
 		if (durationInMonths != -1) courseToBeUpdated.setDurationInMonths(durationInMonths);
 		if (endDate != null && !endDate.getLocalDate().equals(LocalDate.MIN)) courseToBeUpdated.setEndDate(endDate.getLocalDate());
-//		if (startDate != null) courseToBeUpdated.setStartDate(startDate);
+		if (startDate != null && !startDate.getLocalDate().equals(LocalDate.MIN)) courseToBeUpdated.setStartDate(startDate.getLocalDate());
 //		if (timeStamp != null) courseToBeUpdated.setTimeStamp(timeStamp);
 //		
 //		//relational stuff
