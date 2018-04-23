@@ -22,11 +22,11 @@ public class Teacher implements Serializable {
 	private String email;
 	private String phoneNumber;
 	private String password;
-	@ManyToMany(cascade = CascadeType.ALL, mappedBy = "qualifiedTeachers")
+	@ManyToMany(mappedBy = "qualifiedTeachers", fetch = FetchType.LAZY)
 	private Set<Subject> qualifications;
 	@OneToMany
 	private Set<Course> supervisedCourses;
-	@ManyToMany(cascade = CascadeType.ALL, mappedBy = "teachers")
+	@ManyToMany(mappedBy = "teachers", fetch = FetchType.LAZY)
 	private Set<Lecture> lectures;
 	
 	public Teacher() { 

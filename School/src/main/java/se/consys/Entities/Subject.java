@@ -18,7 +18,7 @@ public class Subject implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 	private String subjectName;
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(
 		name = "Subject_Teacher",
 		joinColumns = @JoinColumn(name="Subject_Id", referencedColumnName="id"),

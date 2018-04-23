@@ -15,20 +15,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import se.consys.Entities.Teacher;
 import se.consys.dataaccess.DaoGenericHibernateImpl;
-import se.consys.filters.JWTRequired;
 import se.consys.services.GenericService;
 
 @Path("teachers")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@JWTRequired
 public class TeacherController {
 	
-	private GenericService teacherService;
-
-	public TeacherController()  {
-		this.teacherService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Teacher.class));
-	}
+	private GenericService teacherService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Teacher.class));
 	
 	@GET
 	public Response get() {
@@ -79,8 +73,7 @@ public class TeacherController {
 			return Response.status(204).build();
 		}
 	}
-	
-	//Want to return teacherToBeDeleted as entity() but get lazyInitializationException
+
 	@DELETE
 	@Path("/{id}")
 	public Response delete(@DefaultValue("0") @PathParam("id") int id) {

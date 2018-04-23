@@ -21,9 +21,9 @@ public class Lecture implements Serializable {
 	private int id;
 	private LocalDateTime timeOfLecture;
 	private String lectureRoom;
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	private Course course;
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(
 		name = "Lecture_Teacher",
 		joinColumns = @JoinColumn(name="Lecture_Id", referencedColumnName="id"),

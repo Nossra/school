@@ -29,9 +29,12 @@ public class App {
 //		GenericService lectureService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Lecture.class));
 //		GenericService subjectService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Subject.class));
 //		GenericService courseService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Course.class));
+		LocalDateTime ldt = LocalDateTime.MAX;
+		String a = "2018-12-01T12:42:01";
 		
-		
-					
+		ldt = LocalDateTime.parse(a);
+		System.out.println(ldt);
+				
 	} 
 
 }

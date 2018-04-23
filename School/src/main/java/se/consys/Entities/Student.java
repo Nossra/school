@@ -19,7 +19,7 @@ public class Student implements Serializable {
 	private String lastName;
 	private String email;
 	private String password;
-	@ManyToMany(mappedBy = "students")
+	@ManyToMany(mappedBy = "students", fetch = FetchType.LAZY)
 	private List<Course> courses;
 	
 	public Student() {}

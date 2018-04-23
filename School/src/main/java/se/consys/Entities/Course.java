@@ -1,8 +1,10 @@
 package se.consys.Entities;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonFormatTypes;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -27,15 +29,16 @@ public class Course implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 	private String courseName;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd@HH:mm:ss")
 	private LocalDateTime timeStamp;
 	private LocalDate startDate;
 	private LocalDate endDate;
 	private int durationInMonths;
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	private Teacher supervisor;
 	@ElementCollection
 	private Map<LocalDateTime, Lecture> scheduledLectures;
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(
 		name = "Course_Student",
 		joinColumns = @JoinColumn(name="Course_Id", referencedColumnName="id"),

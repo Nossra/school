@@ -15,15 +15,14 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-
-import org.hibernate.Session;
 import se.consys.Entities.Course;
 import se.consys.Entities.Lecture;
 import se.consys.Entities.Student;
 import se.consys.Entities.Teacher;
 import se.consys.Utilities.HibernateUtility;
-import se.consys.Utilities.LocalDateParam;
 import se.consys.dataaccess.DaoGenericHibernateImpl;
+import se.consys.params.LocalDateParam;
+import se.consys.params.LocalDateTimeParam;
 import se.consys.services.GenericService;
 
 import java.time.LocalDate;
@@ -39,8 +38,9 @@ import java.util.Map;
 @Consumes(MediaType.APPLICATION_JSON)
 public class CourseController {
 	
-	private Session session = HibernateUtility.getSessionFactory().openSession();
 	private GenericService courseService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Course.class));
+	private GenericService teacherService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Teacher.class));
+	private GenericService studentService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Student.class));
 	private String noCourseFoundMsg = "No course found with the specified id.";
 	
 	
@@ -71,29 +71,29 @@ public class CourseController {
 	
 	@PATCH
 	@Path("/{id}")
-	public Response update(
-			@DefaultValue("0") @PathParam("id") int id,
+	public Response partialUpdate(@DefaultValue("0") @PathParam("id") int id, 
+
 			@DefaultValue("null") @QueryParam("name") String courseName,
 			@DefaultValue("-1") @QueryParam("duration") int durationInMonths,
 			@DefaultValue("") @QueryParam("end") LocalDateParam endDate,
-			@DefaultValue("") @QueryParam("start") LocalDateParam startDate)
-//			@DefaultValue("null") @QueryParam("timestamp") LocalDateTime timeStamp,
+			@DefaultValue("") @QueryParam("start") LocalDateParam startDate,
+			@DefaultValue("") @QueryParam("timestamp") LocalDateTimeParam timeStamp,
 //			@DefaultValue("null") @QueryParam("lectures") Map<LocalDateTime, Lecture> scheduledLectures,
 //			@DefaultValue("null") @QueryParam("students") List<Student> students,
-//			@DefaultValue("null") @QueryParam("supervisor") Teacher supervisor)
+			@DefaultValue("-1") @QueryParam("supervisor") int supervisor)
 			{
 		Course courseToBeUpdated = (Course) courseService.findById(id);	
 		System.out.println(courseName);
-		if (courseName != null) courseToBeUpdated.setCourseName(courseName);
+		if (courseName != null || courseName.equals("null")) courseToBeUpdated.setCourseName(courseName);
 		if (durationInMonths != -1) courseToBeUpdated.setDurationInMonths(durationInMonths);
 		if (endDate != null && !endDate.getLocalDate().equals(LocalDate.MIN)) courseToBeUpdated.setEndDate(endDate.getLocalDate());
 		if (startDate != null && !startDate.getLocalDate().equals(LocalDate.MIN)) courseToBeUpdated.setStartDate(startDate.getLocalDate());
-//		if (timeStamp != null) courseToBeUpdated.setTimeStamp(timeStamp);
-//		
-//		//relational stuff
+		if (timeStamp != null && !timeStamp.getLocalDateTime().equals(LocalDateTime.MIN)) courseToBeUpdated.setTimeStamp(timeStamp.getLocalDateTime());
+		
+		//relational stuff
 //		if (scheduledLectures != null) courseToBeUpdated.setScheduledLectures(scheduledLectures);
 //		if (students != null) courseToBeUpdated.setStudents(students);
-//		if (supervisor != null) courseToBeUpdated.setSupervisor(supervisor);
+		if (supervisor != -1) courseToBeUpdated.setSupervisor((Teacher) teacherService.findById(supervisor));
 		
 		courseService.update(courseToBeUpdated);
 		return Response.status(200).entity(courseToBeUpdated).build();
@@ -103,7 +103,6 @@ public class CourseController {
 	@Path("/{id}")
 	public Response update(@DefaultValue("0") @PathParam("id") int id, Course entity) {
 		try {
-			System.out.println("testing");
 			Course courseToBeUpdated = (Course) courseService.findById(id);
 			courseToBeUpdated.setCourseName(entity.getCourseName());
 			courseToBeUpdated.setDurationInMonths(entity.getDurationInMonths());

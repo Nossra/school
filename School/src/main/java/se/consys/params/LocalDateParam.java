@@ -1,4 +1,4 @@
-package se.consys.Utilities;
+package se.consys.params;
 
 import java.time.LocalDate;
 
