@@ -27,12 +27,13 @@ import se.consys.services.GenericService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 
-
+@SuppressWarnings("rawtypes, unchecked")
 @Path("courses")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -79,12 +80,11 @@ public class CourseController {
 			@DefaultValue("") @QueryParam("start") LocalDateParam startDate,
 			@DefaultValue("") @QueryParam("timestamp") LocalDateTimeParam timeStamp,
 //			@DefaultValue("null") @QueryParam("lectures") Map<LocalDateTime, Lecture> scheduledLectures,
-//			@DefaultValue("null") @QueryParam("students") List<Student> students,
 			@DefaultValue("-1") @QueryParam("supervisor") int supervisor)
 			{
 		Course courseToBeUpdated = (Course) courseService.findById(id);	
 		System.out.println(courseName);
-		if (courseName != null || courseName.equals("null")) courseToBeUpdated.setCourseName(courseName);
+		if (courseName != null) courseToBeUpdated.setCourseName(courseName);
 		if (durationInMonths != -1) courseToBeUpdated.setDurationInMonths(durationInMonths);
 		if (endDate != null && !endDate.getLocalDate().equals(LocalDate.MIN)) courseToBeUpdated.setEndDate(endDate.getLocalDate());
 		if (startDate != null && !startDate.getLocalDate().equals(LocalDate.MIN)) courseToBeUpdated.setStartDate(startDate.getLocalDate());
@@ -92,11 +92,42 @@ public class CourseController {
 		
 		//relational stuff
 //		if (scheduledLectures != null) courseToBeUpdated.setScheduledLectures(scheduledLectures);
-//		if (students != null) courseToBeUpdated.setStudents(students);
 		if (supervisor != -1) courseToBeUpdated.setSupervisor((Teacher) teacherService.findById(supervisor));
 		
 		courseService.update(courseToBeUpdated);
 		return Response.status(200).entity(courseToBeUpdated).build();
+	}
+
+//	PATCH into course/id/students?update and add a string of student id's separated with "-"
+//	An example string entered could be "1-12-15-6-7" etc. These are split up and put into an array
+//	that get parsed into a list of integers. These are compared to all the students in the database
+//	and put into a new list that gets added into the course object.  
+	@PATCH
+	@Path("/{id}/students")
+	public Response partialUpdateOnStudents(
+			@DefaultValue("0") @PathParam("id") int id,
+			@DefaultValue("null") @QueryParam("update") String studentString) {
+		String[] seperatedIds = studentString.split("-");
+		List<Integer> studentIds = new ArrayList<Integer>();
+		for (int i = 0; i < seperatedIds.length; i++) {
+			studentIds.add((int) Integer.parseInt(seperatedIds[i]));
+		}
+		
+		List<Student> allStudents = studentService.findAll();
+		List<Student> StudentsToAddIntoCourse = new ArrayList<Student>();
+		for (int i = 0; i < allStudents.size(); i++) {
+			for(int j = 0; j < studentIds.size(); j++) {
+				if (allStudents.get(i).getId() == studentIds.get(j)) {
+					StudentsToAddIntoCourse.add(allStudents.get(i));
+				}
+			}
+		}
+		
+		Course courseToBeUpdated = (Course) courseService.findById(id);
+		if (studentString != null) courseToBeUpdated.setStudents(StudentsToAddIntoCourse);
+		courseService.update(courseToBeUpdated);
+		
+		return Response.status(200).build();
 	}
 	
 	@PUT

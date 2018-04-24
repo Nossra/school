@@ -2,6 +2,7 @@ package se.consys.main;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -30,10 +31,22 @@ public class App {
 //		GenericService subjectService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Subject.class));
 //		GenericService courseService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Course.class));
 		LocalDateTime ldt = LocalDateTime.MAX;
-		String a = "2018-12-01T12:42:01";
+//		String a = "2018-12-01T12:42:01";
+//		
+//		ldt = LocalDateTime.parse(a);
+//		System.out.println(ldt);
+//		
+//		
+		String studentString = "1-2-12-5-3-71";
+		String[] seperatedIds = studentString.split("-");
+		List<Integer> students = new ArrayList<Integer>();
+		for (int i = 0; i < seperatedIds.length; i++) {
+			students.add((int) Integer.parseInt(seperatedIds[i]));
+		}
 		
-		ldt = LocalDateTime.parse(a);
-		System.out.println(ldt);
+		for (int s : students) {
+			System.out.println(s);
+		}
 				
 	} 
 
