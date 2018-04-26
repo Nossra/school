@@ -23,6 +23,7 @@ import se.consys.Utilities.HibernateUtility;
 import se.consys.dataaccess.DaoGenericHibernateImpl;
 import se.consys.params.LocalDateParam;
 import se.consys.params.LocalDateTimeParam;
+import se.consys.params.MapHelper;
 import se.consys.services.GenericService;
 
 import java.time.LocalDate;
@@ -79,7 +80,7 @@ public class CourseController {
 			@DefaultValue("") @QueryParam("end") LocalDateParam endDate,
 			@DefaultValue("") @QueryParam("start") LocalDateParam startDate,
 			@DefaultValue("") @QueryParam("timestamp") LocalDateTimeParam timeStamp,
-//			@DefaultValue("null") @QueryParam("lectures") Map<LocalDateTime, Lecture> scheduledLectures,
+//			@DefaultValue("null") @QueryParam("lectures") Map<LocalDateTimeParam, String> scheduledLectures,
 			@DefaultValue("-1") @QueryParam("supervisor") int supervisor)
 			{
 		Course courseToBeUpdated = (Course) courseService.findById(id);	
@@ -95,7 +96,7 @@ public class CourseController {
 		if (supervisor != -1) courseToBeUpdated.setSupervisor((Teacher) teacherService.findById(supervisor));
 		
 		courseService.update(courseToBeUpdated);
-		return Response.status(200).entity(courseToBeUpdated).build();
+		return Response.status(200).build();
 	}
 
 //	PATCH into course/id/students?update and add a string of student id's separated with "-"
@@ -127,6 +128,28 @@ public class CourseController {
 		if (studentString != null) courseToBeUpdated.setStudents(StudentsToAddIntoCourse);
 		courseService.update(courseToBeUpdated);
 		
+		return Response.status(200).build();
+	}
+	
+	
+//	EXAMPLE mapString: "2018-12-01T12:42:01,1/2018-12-02T15:42:01,4/2018-12-03T17:30:00,3"
+	@PATCH
+	@Path("/{id}/lectures")
+	public Response partialUpdateOnLectures(
+			@DefaultValue("0") @PathParam("id") int id,
+			@DefaultValue("null") @QueryParam("update") String mapString) {
+			
+			String[][] separatedString = MapHelper.getScheduleStrings(mapString);
+			List<LocalDateTime> timestamps = MapHelper.getTimestamps(separatedString);
+			List<Integer> lectureIds = MapHelper.getLectureIds(separatedString);
+			
+			for (int i = 0; i < timestamps.size(); i++) {
+				for (int j = 0; j < lectureIds.size(); j++) {
+					//GET LECTURE FROM LECTURE ID AND USE THEM TOGETHER WITH THE TIMESTAMPS TO CREATE
+					//SEPARATE HASHMAPS  TO PUT INTO THE DATABASE
+				}
+			}
+			
 		return Response.status(200).build();
 	}
 	
