@@ -19,17 +19,17 @@ import se.consys.Entities.Course;
 import se.consys.Entities.Lecture;
 import se.consys.Entities.Student;
 import se.consys.Entities.Teacher;
-import se.consys.Utilities.HibernateUtility;
 import se.consys.dataaccess.DaoGenericHibernateImpl;
 import se.consys.params.LocalDateParam;
 import se.consys.params.LocalDateTimeParam;
 import se.consys.params.MapHelper;
 import se.consys.services.GenericService;
-
+import se.consys.viewmodels.CourseViewModel;
+import se.consys.viewmodels.StudentViewModel;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,13 +43,46 @@ public class CourseController {
 	private GenericService courseService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Course.class));
 	private GenericService teacherService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Teacher.class));
 	private GenericService studentService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Student.class));
+	private GenericService lectureService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Lecture.class));
+
 	private String noCourseFoundMsg = "No course found with the specified id.";
 	
 	
 	@GET
 	public Response getAll() {
 		List<Course> courses = courseService.findAll();
-		return Response.ok(courses).build();
+		List<CourseViewModel> coursesToReturn = new ArrayList<CourseViewModel>();
+		for (int i = 0; i < courses.size(); i++) {
+			CourseViewModel cvm = new CourseViewModel();
+			cvm.setCourseName(courses.get(i).getCourseName());
+			cvm.setDurationInMonths(courses.get(i).getDurationInMonths());
+			cvm.setEndDate(courses.get(i).getEndDate());
+			cvm.setId(courses.get(i).getId());
+			cvm.setScheduledLectures(courses.get(i).getScheduledLectures());
+			cvm.setStartDate(courses.get(i).getStartDate());
+			if (courses.get(i).getSupervisor() != null) {
+				cvm.setTeacherFirstName(courses.get(i).getSupervisor().getFirstName());
+				cvm.setTeacherLastName(courses.get(i).getSupervisor().getLastName());
+			}
+			cvm.setTimeStamp(courses.get(i).getTimeStamp());
+			
+			if (courses.get(i).getStudents() != null) {
+				List<StudentViewModel> students = new ArrayList<StudentViewModel>();
+				for (int j = 0; j < courses.get(i).getStudents().size(); j++) {
+					StudentViewModel svm = new StudentViewModel(
+							courses.get(i).getStudents().get(j).getId(), 
+							courses.get(i).getStudents().get(j).getFirstName(),
+							courses.get(i).getStudents().get(j).getLastName(), 
+							courses.get(i).getStudents().get(j).getEmail(),
+							courses.get(i).getStudents().get(j).getPassword());
+					students.add(svm);
+				}
+				cvm.setStudents(students);
+			}
+			coursesToReturn.add(cvm);
+		}
+		
+		return Response.ok(coursesToReturn).build();
 	}
 	
 	@GET
@@ -57,7 +90,35 @@ public class CourseController {
 	public Response getById(@PathParam("id") int id) {
 		try {
 			Course course = (Course) courseService.findById(id);
-			return Response.ok().entity(course).build();
+
+			CourseViewModel cvm = new CourseViewModel();
+			cvm.setCourseName(course.getCourseName());
+			cvm.setDurationInMonths(course.getDurationInMonths());
+			cvm.setEndDate(course.getEndDate());
+			cvm.setId(course.getId());
+			cvm.setScheduledLectures(course.getScheduledLectures());
+			cvm.setStartDate(course.getStartDate());
+			if (course.getSupervisor() != null) {
+				cvm.setTeacherFirstName(course.getSupervisor().getFirstName());
+				cvm.setTeacherLastName(course.getSupervisor().getLastName());
+			}
+			cvm.setTimeStamp(course.getTimeStamp());
+			
+			List<StudentViewModel> students = new ArrayList<StudentViewModel>();
+			if (course.getStudents() != null) {
+				for (int i = 0; i < course.getStudents().size(); i++) {
+					StudentViewModel svm = new StudentViewModel(
+							course.getStudents().get(i).getId(), 
+							course.getStudents().get(i).getFirstName(),
+							course.getStudents().get(i).getLastName(), 
+							course.getStudents().get(i).getEmail(),
+							course.getStudents().get(i).getPassword());
+					students.add(svm);
+				}
+			}
+			cvm.setStudents(students);
+			
+			return Response.ok().entity(cvm).build();
 		} catch (NoResultException e) {
 			System.out.println(noCourseFoundMsg);
 			return Response.status(204).build();
@@ -139,18 +200,32 @@ public class CourseController {
 			@DefaultValue("0") @PathParam("id") int id,
 			@DefaultValue("null") @QueryParam("update") String mapString) {
 			
-			String[][] separatedString = MapHelper.getScheduleStrings(mapString);
-			List<LocalDateTime> timestamps = MapHelper.getTimestamps(separatedString);
-			List<Integer> lectureIds = MapHelper.getLectureIds(separatedString);
-			
+		String[][] separatedString = MapHelper.getScheduleStrings(mapString);
+		List<LocalDateTime> timestamps = MapHelper.getTimestamps(separatedString);
+		List<Integer> lectureIds = MapHelper.getLectureIds(separatedString);
+		
+		if (timestamps.size() != lectureIds.size()) {
+			System.out.println("The mapString was incorrect as there weren't the same amount of ids as there were timestamps.");
+			return Response.status(400).build();
+		} else {
+			Map<LocalDateTime, Lecture> scheduledLectures = new HashMap<LocalDateTime, Lecture>();
 			for (int i = 0; i < timestamps.size(); i++) {
-				for (int j = 0; j < lectureIds.size(); j++) {
-					//GET LECTURE FROM LECTURE ID AND USE THEM TOGETHER WITH THE TIMESTAMPS TO CREATE
-					//SEPARATE HASHMAPS  TO PUT INTO THE DATABASE
-				}
+				//GET LECTURE FROM LECTURE ID AND USE THEM TOGETHER WITH THE TIMESTAMPS TO CREATE
+				//SEPARATE HASHMAPS  TO PUT INTO THE DATABASE
+				try {
+					Lecture lecture = (Lecture) lectureService.findById(lectureIds.get(i));
+					scheduledLectures.put(timestamps.get(i), lecture);
+				} catch(NoResultException e) {
+					System.out.println("No result found for lecture id: " + lectureIds.get(i));
+					return Response.status(400).build();
+				}				
 			}
 			
-		return Response.status(200).build();
+			Course courseToBeUpdated = (Course) courseService.findById(id);
+			courseToBeUpdated.setScheduledLectures(scheduledLectures);
+			courseService.update(courseToBeUpdated);
+			return Response.status(200).build();
+		}	
 	}
 	
 	@PUT
