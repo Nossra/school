@@ -3,6 +3,9 @@ package se.consys.controllers;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import org.omg.PortableServer.RequestProcessingPolicyOperations;
+
 import javax.persistence.NoResultException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -23,15 +26,20 @@ import se.consys.dataaccess.DaoGenericHibernateImpl;
 import se.consys.params.LocalDateParam;
 import se.consys.params.LocalDateTimeParam;
 import se.consys.params.MapHelper;
+import se.consys.params.SetHelper;
 import se.consys.services.GenericService;
 import se.consys.viewmodels.CourseViewModel;
 import se.consys.viewmodels.StudentViewModel;
+import se.consys.viewmodels.TeacherViewModel;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 @SuppressWarnings("rawtypes, unchecked")
@@ -45,7 +53,7 @@ public class CourseController {
 	private GenericService studentService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Student.class));
 	private GenericService lectureService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Lecture.class));
 
-	private String noCourseFoundMsg = "No course found with the specified id.";
+	private String noCourseFoundMsg = "No course found with the specified id: ";
 	
 	
 	@GET
@@ -60,11 +68,16 @@ public class CourseController {
 			cvm.setId(courses.get(i).getId());
 			cvm.setScheduledLectures(courses.get(i).getScheduledLectures());
 			cvm.setStartDate(courses.get(i).getStartDate());
-			if (courses.get(i).getSupervisor() != null) {
-				cvm.setTeacherFirstName(courses.get(i).getSupervisor().getFirstName());
-				cvm.setTeacherLastName(courses.get(i).getSupervisor().getLastName());
-			}
 			cvm.setTimeStamp(courses.get(i).getTimeStamp());
+			
+			if (courses.get(i).getSupervisors() != null) {
+				Set<TeacherViewModel> teachers = new HashSet<TeacherViewModel>();
+				for (Teacher t : courses.get(i).getSupervisors()) {
+					TeacherViewModel tvm = new TeacherViewModel(t.getId(), t.getFirstName(), t.getLastName(), t.getEmail(), t.getPhoneNumber(), t.getPassword());
+					teachers.add(tvm);
+				}
+				cvm.setSupervisors(teachers);
+			}
 			
 			if (courses.get(i).getStudents() != null) {
 				List<StudentViewModel> students = new ArrayList<StudentViewModel>();
@@ -98,11 +111,16 @@ public class CourseController {
 			cvm.setId(course.getId());
 			cvm.setScheduledLectures(course.getScheduledLectures());
 			cvm.setStartDate(course.getStartDate());
-			if (course.getSupervisor() != null) {
-				cvm.setTeacherFirstName(course.getSupervisor().getFirstName());
-				cvm.setTeacherLastName(course.getSupervisor().getLastName());
-			}
 			cvm.setTimeStamp(course.getTimeStamp());
+			
+			Set<TeacherViewModel> teachers = new HashSet<TeacherViewModel>();
+			if (course.getSupervisors() != null) {
+				for (Teacher t : course.getSupervisors()) {
+					TeacherViewModel tvm = new TeacherViewModel(t.getId(), t.getFirstName(), t.getLastName(), t.getEmail(), t.getPhoneNumber(), t.getPassword());
+					teachers.add(tvm);
+				}
+			}
+			cvm.setSupervisors(teachers);
 			
 			List<StudentViewModel> students = new ArrayList<StudentViewModel>();
 			if (course.getStudents() != null) {
@@ -120,7 +138,7 @@ public class CourseController {
 			
 			return Response.ok().entity(cvm).build();
 		} catch (NoResultException e) {
-			System.out.println(noCourseFoundMsg);
+			System.out.println(noCourseFoundMsg + id);
 			return Response.status(204).build();
 		}
 	}
@@ -132,66 +150,61 @@ public class CourseController {
 		return Response.status(201).entity(entity).build();
 	}
 	
+//	PATCH into course/id and add a string of student, lectures or teacher id's separated with "-"
+//	An example string entered could be "1-12-15-6-7" etc. These are split up and put into an array
+//	that get parsed into a list of integers. Using the sethelper class. These are compared to all
+//	the students in the database and put into a new list that gets added into the course object.  
 	@PATCH
 	@Path("/{id}")
 	public Response partialUpdate(@DefaultValue("0") @PathParam("id") int id, 
 
-			@DefaultValue("null") @QueryParam("name") String courseName,
+			@DefaultValue("") @QueryParam("name") String courseName,
 			@DefaultValue("-1") @QueryParam("duration") int durationInMonths,
 			@DefaultValue("") @QueryParam("end") LocalDateParam endDate,
 			@DefaultValue("") @QueryParam("start") LocalDateParam startDate,
 			@DefaultValue("") @QueryParam("timestamp") LocalDateTimeParam timeStamp,
-//			@DefaultValue("null") @QueryParam("lectures") Map<LocalDateTimeParam, String> scheduledLectures,
-			@DefaultValue("-1") @QueryParam("supervisor") int supervisor)
+			@DefaultValue("") @QueryParam("teachers") String teacherString,
+			@DefaultValue("") @QueryParam("students") String studentString,
+			@DefaultValue("") @QueryParam("lectures") String lectureString)
 			{
-		Course courseToBeUpdated = (Course) courseService.findById(id);	
-		System.out.println(courseName);
-		if (courseName != null) courseToBeUpdated.setCourseName(courseName);
-		if (durationInMonths != -1) courseToBeUpdated.setDurationInMonths(durationInMonths);
-		if (endDate != null && !endDate.getLocalDate().equals(LocalDate.MIN)) courseToBeUpdated.setEndDate(endDate.getLocalDate());
-		if (startDate != null && !startDate.getLocalDate().equals(LocalDate.MIN)) courseToBeUpdated.setStartDate(startDate.getLocalDate());
-		if (timeStamp != null && !timeStamp.getLocalDateTime().equals(LocalDateTime.MIN)) courseToBeUpdated.setTimeStamp(timeStamp.getLocalDateTime());
-		
-		//relational stuff
-//		if (scheduledLectures != null) courseToBeUpdated.setScheduledLectures(scheduledLectures);
-		if (supervisor != -1) courseToBeUpdated.setSupervisor((Teacher) teacherService.findById(supervisor));
-		
-		courseService.update(courseToBeUpdated);
-		return Response.status(200).build();
-	}
-
-//	PATCH into course/id/students?update and add a string of student id's separated with "-"
-//	An example string entered could be "1-12-15-6-7" etc. These are split up and put into an array
-//	that get parsed into a list of integers. These are compared to all the students in the database
-//	and put into a new list that gets added into the course object.  
-	@PATCH
-	@Path("/{id}/students")
-	public Response partialUpdateOnStudents(
-			@DefaultValue("0") @PathParam("id") int id,
-			@DefaultValue("null") @QueryParam("update") String studentString) {
-		String[] seperatedIds = studentString.split("-");
-		List<Integer> studentIds = new ArrayList<Integer>();
-		for (int i = 0; i < seperatedIds.length; i++) {
-			studentIds.add((int) Integer.parseInt(seperatedIds[i]));
-		}
-		
-		List<Student> allStudents = studentService.findAll();
-		List<Student> StudentsToAddIntoCourse = new ArrayList<Student>();
-		for (int i = 0; i < allStudents.size(); i++) {
-			for(int j = 0; j < studentIds.size(); j++) {
-				if (allStudents.get(i).getId() == studentIds.get(j)) {
-					StudentsToAddIntoCourse.add(allStudents.get(i));
+		try {
+			Course courseToBeUpdated = (Course) courseService.findById(id);	
+			System.out.println(courseName);
+			if (!courseName.equals("")) courseToBeUpdated.setCourseName(courseName);
+			if (durationInMonths != -1) courseToBeUpdated.setDurationInMonths(durationInMonths);
+			if (endDate != null && !endDate.getLocalDate().equals(LocalDate.MIN)) courseToBeUpdated.setEndDate(endDate.getLocalDate());
+			if (startDate != null && !startDate.getLocalDate().equals(LocalDate.MIN)) courseToBeUpdated.setStartDate(startDate.getLocalDate());
+			if (timeStamp!= null && !timeStamp.getLocalDateTime().equals(LocalDateTime.MIN)) courseToBeUpdated.setTimeStamp(timeStamp.getLocalDateTime());
+			
+			// Teachers
+			if (!teacherString.equals("")) {
+				List<Integer> teacherIds = SetHelper.separateIds(teacherString);
+				Set<Teacher> teachers = new HashSet<Teacher>();
+				for (int i = 0; i < teacherIds.size(); i++) {
+					Teacher teacher = (Teacher) teacherService.findById(teacherIds.get(i));
+					teachers.add(teacher);
 				}
+				courseToBeUpdated.setSupervisors(teachers);
 			}
+			
+			// Students
+			if (!studentString.equals("")) {
+				List<Integer> studentIds = SetHelper.separateIds(studentString);
+				List<Student> students = new ArrayList<Student>();
+				for (int i = 0; i < studentIds.size(); i++) {
+					Student student = (Student) studentService.findById(studentIds.get(i));
+					students.add(student);
+				}
+				courseToBeUpdated.setStudents(students);
+			}
+			
+			courseService.update(courseToBeUpdated);
+			return Response.status(200).build();
+		} catch (NoResultException e) {
+			System.out.println(noCourseFoundMsg + id);
+			return Response.status(204).build();
 		}
-		
-		Course courseToBeUpdated = (Course) courseService.findById(id);
-		if (studentString != null) courseToBeUpdated.setStudents(StudentsToAddIntoCourse);
-		courseService.update(courseToBeUpdated);
-		
-		return Response.status(200).build();
-	}
-	
+	 }	
 	
 //	EXAMPLE mapString: "2018-12-01T12:42:01,1/2018-12-02T15:42:01,4/2018-12-03T17:30:00,3"
 	@PATCH
@@ -217,14 +230,19 @@ public class CourseController {
 					scheduledLectures.put(timestamps.get(i), lecture);
 				} catch(NoResultException e) {
 					System.out.println("No result found for lecture id: " + lectureIds.get(i));
-					return Response.status(400).build();
+					return Response.status(204).build();
 				}				
 			}
 			
-			Course courseToBeUpdated = (Course) courseService.findById(id);
-			courseToBeUpdated.setScheduledLectures(scheduledLectures);
-			courseService.update(courseToBeUpdated);
-			return Response.status(200).build();
+			try {
+				Course courseToBeUpdated = (Course) courseService.findById(id);
+				courseToBeUpdated.setScheduledLectures(scheduledLectures);
+				courseService.update(courseToBeUpdated);
+				return Response.status(200).build();
+			} catch (NoResultException e) {
+				System.out.println(noCourseFoundMsg + id);
+				return Response.status(204).build();
+			}
 		}	
 	}
 	
@@ -239,12 +257,11 @@ public class CourseController {
 			courseToBeUpdated.setScheduledLectures(entity.getScheduledLectures());
 			courseToBeUpdated.setStartDate(entity.getStartDate());
 			courseToBeUpdated.setStudents(entity.getStudents());
-			courseToBeUpdated.setSupervisor(entity.getSupervisor());
 			courseToBeUpdated.setTimeStamp(entity.getTimeStamp());
 			courseService.update(courseToBeUpdated);
 			return Response.status(200).entity(entity).build();
 		} catch (NoResultException e) {
-			System.out.println(noCourseFoundMsg);
+			System.out.println(noCourseFoundMsg + id);
 			return Response.ok().status(204).build();
 		}
 	}
@@ -257,7 +274,7 @@ public class CourseController {
 			courseService.delete(courseToBeDeleted);
 			return Response.status(200).build();
 		} catch (NoResultException e) {
-			System.out.println(noCourseFoundMsg);
+			System.out.println(noCourseFoundMsg + id);
 			return Response.status(204).build();
 		} 
 	}

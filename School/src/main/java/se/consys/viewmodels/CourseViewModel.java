@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import se.consys.Entities.Lecture;
 import se.consys.Entities.Student;
 public class CourseViewModel {
@@ -13,8 +15,7 @@ public class CourseViewModel {
 	private LocalDate startDate;
 	private LocalDate endDate;
 	private int durationInMonths;
-	private String teacherFirstName;
-	private String teacherLastName;
+	private Set<TeacherViewModel> supervisors;
 	private Map<LocalDateTime, Lecture> scheduledLectures;
 	private List<StudentViewModel> students;
 	
@@ -66,16 +67,10 @@ public class CourseViewModel {
 	public void setStudents(List<StudentViewModel> students) {
 		this.students = students;
 	}
-	public String getTeacherLastName() {
-		return teacherLastName;
+	public Set<TeacherViewModel> getSupervisors() {
+		return supervisors;
 	}
-	public void setTeacherLastName(String teacherLastName) {
-		this.teacherLastName = teacherLastName;
-	}
-	public String getTeacherFirstName() {
-		return teacherFirstName;
-	}
-	public void setTeacherFirstName(String teacherFirstName) {
-		this.teacherFirstName = teacherFirstName;
+	public void setSupervisors(Set<TeacherViewModel> supervisors) {
+		this.supervisors = supervisors;
 	}
 }

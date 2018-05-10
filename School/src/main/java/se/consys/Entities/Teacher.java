@@ -4,13 +4,18 @@ import java.io.Serializable;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+
+import org.hibernate.annotations.Cascade;
 
 @Entity
 public class Teacher implements Serializable {
@@ -24,7 +29,7 @@ public class Teacher implements Serializable {
 	private String password;
 	@ManyToMany(mappedBy = "qualifiedTeachers", fetch = FetchType.LAZY)
 	private Set<Subject> qualifications;
-	@OneToMany
+	@ManyToMany(mappedBy = "supervisors", fetch = FetchType.LAZY)
 	private Set<Course> supervisedCourses;
 	@ManyToMany(mappedBy = "teachers", fetch = FetchType.LAZY)
 	private Set<Lecture> lectures;

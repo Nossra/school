@@ -1,6 +1,8 @@
 package se.consys.Entities;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Cascade;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -11,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -34,8 +37,12 @@ public class Course implements Serializable {
 	private LocalDate startDate;
 	private LocalDate endDate;
 	private int durationInMonths;
-	@ManyToOne(fetch = FetchType.LAZY)
-	private Teacher supervisor;
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(
+			name = "course_teacher",
+			joinColumns = @JoinColumn(name="course_id", referencedColumnName="id"),
+			inverseJoinColumns = @JoinColumn(name="teacher_id", referencedColumnName="id"))
+	private Set<Teacher> supervisors;
 	@ElementCollection
 	private Map<LocalDateTime, Lecture> scheduledLectures;
 	@ManyToMany(fetch = FetchType.LAZY)
@@ -72,12 +79,6 @@ public class Course implements Serializable {
 	public void setScheduledLectures(Map<LocalDateTime, Lecture> scheduledLectures) {
 		this.scheduledLectures = scheduledLectures;
 	}
-	public Teacher getSupervisor() {
-		return supervisor;
-	}
-	public void setSupervisor(Teacher supervisor) {
-		this.supervisor = supervisor;
-	}
 	public int getDurationInMonths() {
 		return durationInMonths;
 	}
@@ -113,5 +114,13 @@ public class Course implements Serializable {
 	}
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public Set<Teacher> getSupervisors() {
+		return supervisors;
+	}
+
+	public void setSupervisors(Set<Teacher> supervisors) {
+		this.supervisors = supervisors;
 	}
 }

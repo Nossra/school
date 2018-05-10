@@ -3,6 +3,7 @@ package se.consys.Entities;
 import java.io.Serializable;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -12,12 +13,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 
+import org.hibernate.annotations.Cascade;
+
 @Entity
 public class Subject implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 	private String subjectName;
+	@Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(
 		name = "Subject_Teacher",

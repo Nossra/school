@@ -14,6 +14,8 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 
+import org.hibernate.annotations.Cascade;
+
 @Entity
 public class Lecture implements Serializable {
 	@Id

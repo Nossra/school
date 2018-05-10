@@ -38,7 +38,7 @@ public class DaoGenericHibernateImpl<T extends Serializable> implements IGeneric
 	public T update(T entity) {
 		if (entity.getClass().getSimpleName().equals(activeClassName)) {
 			session.beginTransaction();
-			session.merge(entity);  
+			session.merge(entity); 
 			session.getTransaction().commit();
 			return entity;
 		} else {
@@ -53,7 +53,6 @@ public class DaoGenericHibernateImpl<T extends Serializable> implements IGeneric
 	public void delete(T entity) {
 		if (entity.getClass().getSimpleName().equals(activeClassName)) {
 			session.beginTransaction();
-			//session.update(entity);
 			session.delete(entity);
 
 			session.getTransaction().commit();

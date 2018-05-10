@@ -19,6 +19,7 @@ import se.consys.Entities.Subject;
 import se.consys.Entities.Teacher;
 import se.consys.Utilities.HibernateUtility;
 import se.consys.dataaccess.DaoGenericHibernateImpl;
+import se.consys.params.SetHelper;
 import se.consys.services.GenericService;
 
 public class App {
@@ -55,63 +56,31 @@ public class App {
 //		scheduledLectures.put(LocalDateTime.MAX, new Lecture());
 //		scheduledLectures.get(LocalDateTime.MAX).setId(5);
 //		System.out.println(scheduledLectures.get(LocalDateTime.MAX).getId());
-		List<Integer> lectures = getLectureIds(App.getScheduleStrings("2018-12-01T12:42:01,1/2018-12-02T15:42:01,4/2018-12-03T17:30:00,3"));
-		System.out.println("LECTURE IDS");
-		for (Integer i : lectures) {
-			System.out.println(i);
-		}
-		System.out.println();
-		List<LocalDateTime> timestamps = getTimestamps(App.getScheduleStrings("2018-12-01T12:42:01,1/2018-12-02T15:42:01,4/2018-12-03T17:30:00,3"));
-		System.out.println("TIMESTAMPS");
-		for (LocalDateTime ldt : timestamps) {
-			System.out.println(ldt);
-		}
-				
-	} 
-	
-	public static String[][] getScheduleStrings(String string) {
-		String[] separatedScheduleStrings = string.split("/");
-		Map<LocalDateTime, Lecture> lectures = new HashMap<LocalDateTime, Lecture>();
-
-		String[][] separatedTimeAndCourseIds = new String[separatedScheduleStrings.length][];
-		for (int i = 0; i < separatedScheduleStrings.length; i++) {
-			separatedTimeAndCourseIds[i] = separatedScheduleStrings[i].split(",");
+//		List<Integer> lectures = getLectureIds(App.getScheduleStrings("2018-12-01T12:42:01,1/2018-12-02T15:42:01,4/2018-12-03T17:30:00,3"));
+//		System.out.println("LECTURE IDS");
+//		for (Integer i : lectures) {
+//			System.out.println(i);
+//		}
+//		System.out.println();
+//		List<LocalDateTime> timestamps = getTimestamps(App.getScheduleStrings("2018-12-01T12:42:01,1/2018-12-02T15:42:01,4/2018-12-03T17:30:00,3"));
+//		System.out.println("TIMESTAMPS");
+//		for (LocalDateTime ldt : timestamps) {
+//			System.out.println(ldt);
+//		}
+		GenericService courseService = GenericService.getGenericService(new DaoGenericHibernateImpl<>(Course.class));
+		List<Integer> courseIds = SetHelper.separateIds("1-3");
+		Set<Course> courses = new HashSet<Course>();
+		for (int i = 0; i < courseIds.size(); i++) {
+			Course course = (Course) courseService.findById(courseIds.get(i));
+			courses.add(course);
 		}
 		
-		return separatedTimeAndCourseIds;
-	}
+		for (Course c : courses) {
+			System.out.println(c.getCourseName());
+		}
+		
+	} 
 	
-	public static List<Integer> getLectureIds(String[][] array) {
-		List<String> lectureStrings = new ArrayList<String>();
-		for (int i = 0; i < array.length; i++) {
-			for (int j = 0; j < array[i].length; j++) {
-				if (j % 2 != 0) {
-					lectureStrings.add(array[i][j]);
-				}
-			}			
-		}
-		List<Integer> lectureIds = new ArrayList<Integer>();
-		for (int i = 0; i < lectureStrings.size(); i++) {
-			lectureIds.add(Integer.parseInt(lectureStrings.get(i)));
-		}
-		return lectureIds;
-	}
-	
-	public static List<LocalDateTime> getTimestamps(String[][] array) {
-		List<String> times = new ArrayList<String>();
-		for (int i = 0; i < array.length; i++) {
-			for (int j = 0; j < array[i].length; j++) {
-				if (j % 2 == 0) {
-					times.add(array[i][j]);
-				}
-			}			
-		}
-		List<LocalDateTime> timestamps = new ArrayList<LocalDateTime>();
-		for (int i = 0; i < times.size(); i++) {
-			timestamps.add(LocalDateTime.parse(times.get(i)));
-		}
-		return timestamps;
-	}
 	
 	
 }

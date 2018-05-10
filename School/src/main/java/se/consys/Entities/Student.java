@@ -10,6 +10,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 
+import org.hibernate.annotations.Cascade;
+
 @Entity
 public class Student implements Serializable {
 	@Id
@@ -19,6 +21,7 @@ public class Student implements Serializable {
 	private String lastName;
 	private String email;
 	private String password;
+	@Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
 	@ManyToMany(mappedBy = "students", fetch = FetchType.LAZY)
 	private List<Course> courses;
 	
