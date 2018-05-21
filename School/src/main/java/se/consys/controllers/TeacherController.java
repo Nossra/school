@@ -193,7 +193,7 @@ public class TeacherController {
 				}
 				tvm.setSubjectNames(subjectNames);
 				teacherToBeUpdated.setQualifications(subjects);
-			}			
+			}	
 			
 			tvm.setId(teacherToBeUpdated.getId());
 			tvm.setFirstName(teacherToBeUpdated.getFirstName());
@@ -201,6 +201,10 @@ public class TeacherController {
 			tvm.setEmail(teacherToBeUpdated.getEmail());
 			tvm.setPhoneNumber(teacherToBeUpdated.getPhoneNumber());
 			tvm.setPassword(teacherToBeUpdated.getPassword());
+			
+			for (Subject s : teacherToBeUpdated.getQualifications()) {
+				System.out.println(s.getSubjectName());
+			}
 			
 			teacherService.update(teacherToBeUpdated);
 			return Response.status(200).entity(tvm).build();

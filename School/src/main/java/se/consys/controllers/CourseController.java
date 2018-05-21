@@ -216,7 +216,6 @@ public class CourseController {
 		String[][] separatedString = MapHelper.getScheduleStrings(mapString);
 		List<LocalDateTime> timestamps = MapHelper.getTimestamps(separatedString);
 		List<Integer> lectureIds = MapHelper.getLectureIds(separatedString);
-		
 		if (timestamps.size() != lectureIds.size()) {
 			System.out.println("The mapString was incorrect as there weren't the same amount of ids as there were timestamps.");
 			return Response.status(400).build();
