@@ -66,7 +66,7 @@ public class CourseController {
 			cvm.setDurationInMonths(courses.get(i).getDurationInMonths());
 			cvm.setEndDate(courses.get(i).getEndDate());
 			cvm.setId(courses.get(i).getId());
-			cvm.setScheduledLectures(courses.get(i).getScheduledLectures());
+//			cvm.setScheduledLectures(courses.get(i).getScheduledLectures());
 			cvm.setStartDate(courses.get(i).getStartDate());
 			cvm.setTimeStamp(courses.get(i).getTimeStamp());
 			
@@ -109,7 +109,7 @@ public class CourseController {
 			cvm.setDurationInMonths(course.getDurationInMonths());
 			cvm.setEndDate(course.getEndDate());
 			cvm.setId(course.getId());
-			cvm.setScheduledLectures(course.getScheduledLectures());
+//			cvm.setScheduledLectures(course.getScheduledLectures());
 			cvm.setStartDate(course.getStartDate());
 			cvm.setTimeStamp(course.getTimeStamp());
 			
@@ -128,7 +128,7 @@ public class CourseController {
 					StudentViewModel svm = new StudentViewModel(
 							course.getStudents().get(i).getId(), 
 							course.getStudents().get(i).getFirstName(),
-							course.getStudents().get(i).getLastName(), 
+							course.getStudents().get(i).getLastName(), 	
 							course.getStudents().get(i).getEmail(),
 							course.getStudents().get(i).getPassword());
 					students.add(svm);
@@ -178,24 +178,34 @@ public class CourseController {
 			
 			// Teachers
 			if (!teacherString.equals("")) {
-				List<Integer> teacherIds = SetHelper.separateIds(teacherString);
-				Set<Teacher> teachers = new HashSet<Teacher>();
-				for (int i = 0; i < teacherIds.size(); i++) {
-					Teacher teacher = (Teacher) teacherService.findById(teacherIds.get(i));
-					teachers.add(teacher);
+				try {
+					List<Integer> teacherIds = SetHelper.separateIds(teacherString);
+					Set<Teacher> teachers = new HashSet<Teacher>();
+					for (int i = 0; i < teacherIds.size(); i++) {
+						Teacher teacher = (Teacher) teacherService.findById(teacherIds.get(i));
+						teachers.add(teacher);
+					}
+					courseToBeUpdated.setSupervisors(teachers);
+				} catch (NoResultException e) {
+					System.out.println("One or more of the ids sent didnt match any of the teachers.");
+					return Response.status(204).build();
 				}
-				courseToBeUpdated.setSupervisors(teachers);
 			}
 			
 			// Students
 			if (!studentString.equals("")) {
-				List<Integer> studentIds = SetHelper.separateIds(studentString);
-				List<Student> students = new ArrayList<Student>();
-				for (int i = 0; i < studentIds.size(); i++) {
-					Student student = (Student) studentService.findById(studentIds.get(i));
-					students.add(student);
+				try {
+					List<Integer> studentIds = SetHelper.separateIds(studentString);
+					List<Student> students = new ArrayList<Student>();
+					for (int i = 0; i < studentIds.size(); i++) {
+						Student student = (Student) studentService.findById(studentIds.get(i));
+						students.add(student);
+					}
+					courseToBeUpdated.setStudents(students);
+				} catch (NoResultException e) {
+					System.out.println("One or more of the ids sent didnt match any of the students");
+					return Response.status(204).build();
 				}
-				courseToBeUpdated.setStudents(students);
 			}
 			
 			courseService.update(courseToBeUpdated);
@@ -206,44 +216,45 @@ public class CourseController {
 		}
 	 }	
 	
-//	EXAMPLE mapString: "2018-12-01T12:42:01,1/2018-12-02T15:42:01,4/2018-12-03T17:30:00,3"
-	@PATCH
-	@Path("/{id}/lectures")
-	public Response partialUpdateOnLectures(
-			@DefaultValue("0") @PathParam("id") int id,
-			@DefaultValue("null") @QueryParam("update") String mapString) {
-			
-		String[][] separatedString = MapHelper.getScheduleStrings(mapString);
-		List<LocalDateTime> timestamps = MapHelper.getTimestamps(separatedString);
-		List<Integer> lectureIds = MapHelper.getLectureIds(separatedString);
-		if (timestamps.size() != lectureIds.size()) {
-			System.out.println("The mapString was incorrect as there weren't the same amount of ids as there were timestamps.");
-			return Response.status(400).build();
-		} else {
-			Map<LocalDateTime, Lecture> scheduledLectures = new HashMap<LocalDateTime, Lecture>();
-			for (int i = 0; i < timestamps.size(); i++) {
-				//GET LECTURE FROM LECTURE ID AND USE THEM TOGETHER WITH THE TIMESTAMPS TO CREATE
-				//SEPARATE HASHMAPS  TO PUT INTO THE DATABASE
-				try {
-					Lecture lecture = (Lecture) lectureService.findById(lectureIds.get(i));
-					scheduledLectures.put(timestamps.get(i), lecture);
-				} catch(NoResultException e) {
-					System.out.println("No result found for lecture id: " + lectureIds.get(i));
-					return Response.status(204).build();
-				}				
-			}
-			
-			try {
-				Course courseToBeUpdated = (Course) courseService.findById(id);
-				courseToBeUpdated.setScheduledLectures(scheduledLectures);
-				courseService.update(courseToBeUpdated);
-				return Response.status(200).build();
-			} catch (NoResultException e) {
-				System.out.println(noCourseFoundMsg + id);
-				return Response.status(204).build();
-			}
-		}	
-	}
+//	This have been removed from the entity for now.
+////	EXAMPLE mapString: "2018-12-01T12:42:01,1/2018-12-02T15:42:01,4/2018-12-03T17:30:00,3"
+//	@PATCH
+//	@Path("/{id}/lectures")
+//	public Response partialUpdateOnLectures(
+//			@DefaultValue("0") @PathParam("id") int id,
+//			@DefaultValue("null") @QueryParam("update") String mapString) {
+//			
+//		String[][] separatedString = MapHelper.getScheduleStrings(mapString);
+//		List<LocalDateTime> timestamps = MapHelper.getTimestamps(separatedString);
+//		List<Integer> lectureIds = MapHelper.getLectureIds(separatedString);
+//		if (timestamps.size() != lectureIds.size()) {
+//			System.out.println("The mapString was incorrect as there weren't the same amount of ids as there were timestamps.");
+//			return Response.status(400).build();
+//		} else {
+//			Map<LocalDateTime, Lecture> scheduledLectures = new HashMap<LocalDateTime, Lecture>();
+//			for (int i = 0; i < timestamps.size(); i++) {
+//				//GET LECTURE FROM LECTURE ID AND USE THEM TOGETHER WITH THE TIMESTAMPS TO CREATE
+//				//SEPARATE HASHMAPS  TO PUT INTO THE DATABASE
+//				try {
+//					Lecture lecture = (Lecture) lectureService.findById(lectureIds.get(i));
+//					scheduledLectures.put(timestamps.get(i), lecture);
+//				} catch(NoResultException e) {
+//					System.out.println("No result found for lecture id: " + lectureIds.get(i));
+//					return Response.status(204).build();
+//				}				
+//			}
+//			
+//			try {
+//				Course courseToBeUpdated = (Course) courseService.findById(id);
+//				courseToBeUpdated.setScheduledLectures(scheduledLectures);
+//				courseService.update(courseToBeUpdated);
+//				return Response.status(200).build();
+//			} catch (NoResultException e) {
+//				System.out.println(noCourseFoundMsg + id);
+//				return Response.status(204).build();
+//			}
+//		}	
+//	}
 	
 	@PUT
 	@Path("/{id}")
@@ -253,7 +264,7 @@ public class CourseController {
 			courseToBeUpdated.setCourseName(entity.getCourseName());
 			courseToBeUpdated.setDurationInMonths(entity.getDurationInMonths());
 			courseToBeUpdated.setEndDate(entity.getEndDate());
-			courseToBeUpdated.setScheduledLectures(entity.getScheduledLectures());
+//			courseToBeUpdated.setScheduledLectures(entity.getScheduledLectures());
 			courseToBeUpdated.setStartDate(entity.getStartDate());
 			courseToBeUpdated.setStudents(entity.getStudents());
 			courseToBeUpdated.setTimeStamp(entity.getTimeStamp());

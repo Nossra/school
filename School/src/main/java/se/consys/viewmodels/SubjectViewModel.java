@@ -5,9 +5,9 @@ import java.util.Set;
 public class SubjectViewModel {
 	private int id;
 	private String subjectName;
-	private Set<TeacherViewModel> qualifiedTeachers;
+	private Set<String> qualifiedTeachers;
 	
-	public SubjectViewModel(int id, String subjectName, Set<TeacherViewModel> qualifiedTeachers) {
+	public SubjectViewModel(int id, String subjectName, Set<String> qualifiedTeachers) {
 		this.setId(id);
 		this.setSubjectName(subjectName);
 		this.setQualifiedTeachers(qualifiedTeachers);
@@ -28,12 +28,12 @@ public class SubjectViewModel {
 	}
 
 
-	public Set<TeacherViewModel> getQualifiedTeachers() {
+	public Set<String> getQualifiedTeachers() {
 		return qualifiedTeachers;
 	}
 
 
-	public void setQualifiedTeachers(Set<TeacherViewModel> qualifiedTeachers) {
+	public void setQualifiedTeachers(Set<String> qualifiedTeachers) {
 		this.qualifiedTeachers = qualifiedTeachers;
 	}
 }	

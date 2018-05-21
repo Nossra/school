@@ -2,12 +2,14 @@ package se.consys.controllers;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.persistence.NoResultException;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PATCH;
@@ -25,6 +27,7 @@ import se.consys.Entities.Teacher;
 import se.consys.dataaccess.DaoGenericHibernateImpl;
 import se.consys.params.LocalDateTimeParam;
 import se.consys.params.SetHelper;
+import se.consys.viewmodels.LectureViewModel;
 
 @Path("lectures")
 @Produces(MediaType.APPLICATION_JSON)
@@ -39,17 +42,35 @@ public class LectureController {
 	public Response get() {
 		@SuppressWarnings("unchecked")
 		List<Lecture> allLectures = lectureService.findAll();
-		return Response.ok(allLectures).build();
+		List<LectureViewModel> lvmList = new ArrayList<LectureViewModel>();
+		for (Lecture l : allLectures) {
+			LectureViewModel lvm = new LectureViewModel(l.getId(), l.getCourse().getCourseName(), l.getTimeOfLecture(), l.getLectureRoom());
+			Set<String> teacherNames = new HashSet<String>();
+			for (Teacher t : l.getTeachers()) {
+				String teacherName = t.getFirstName() + " " + t.getLastName();
+				teacherNames.add(teacherName);
+			}
+			lvm.setTeacherNames(teacherNames);
+			lvmList.add(lvm);
+		}
+		return Response.ok(lvmList).build();
 	}
 	
 	@GET
 	@Path("/{id}")
 	public Response getById(@PathParam("id") int id) {
 		try {
-			Teacher lectureToBeReturned = (Teacher) lectureService.findById(id);
-			return Response.ok().entity(lectureToBeReturned).build();
+			Lecture l = (Lecture) lectureService.findById(id);
+			LectureViewModel lvm = new LectureViewModel(l.getId(), l.getCourse().getCourseName(), l.getTimeOfLecture(), l.getLectureRoom());
+			Set<String> teacherNames = new HashSet<String>();
+			for (Teacher t : l.getTeachers()) {
+				String teacherName = t.getFirstName() + " " + t.getLastName();
+				teacherNames.add(teacherName);
+			}
+			lvm.setTeacherNames(teacherNames);
+			return Response.ok().entity(lvm).build();
 		} catch (NoResultException e) {
-			System.out.println("No result found when calling teacher with the specified ID.");
+			System.out.println("No result found when calling lecture with the specified ID.");
 			return Response.status(204).build();
 		}
 	}
@@ -75,10 +96,6 @@ public class LectureController {
 			if (courseId != -1) {
 				try {
 					Course course = (Course) courseService.findById(courseId);
-					CourseController c = new CourseController();
-					String time = course.getTimeStamp().toString()+","+id;
-					System.out.println(time);
-					c.partialUpdateOnLectures(courseId, time);
 					lectureToBeUpdated.setCourse(course);
 				} catch(NoResultException e) {
 					System.out.println("No course found with the specified id: " + courseId);
@@ -86,18 +103,36 @@ public class LectureController {
 				}
 			}
 			if (!teacherString.equals("")) {
-				List<Integer> separatedIds = SetHelper.separateIds(teacherString);
-				Set<Teacher> teachers = new HashSet<Teacher>();
-				for (int i = 0; i < separatedIds.size(); i++) {
-					Teacher teacher = (Teacher) teacherService.findById(separatedIds.get(i));
-					teachers.add(teacher);
+				try {
+					List<Integer> separatedIds = SetHelper.separateIds(teacherString);
+					Set<Teacher> teachers = new HashSet<Teacher>();
+					for (int i = 0; i < separatedIds.size(); i++) {
+						Teacher teacher = (Teacher) teacherService.findById(separatedIds.get(i));
+						teachers.add(teacher);
+					}
+					lectureToBeUpdated.setTeachers(teachers);
+				} catch (NoResultException e) {
+					System.out.println("One or more lectures were not found with the sent ids.");
+					return Response.status(204).build();
 				}
-				lectureToBeUpdated.setTeachers(teachers);
 			}
 			lectureService.update(lectureToBeUpdated);
 			return Response.status(200).build();
 		} catch(NoResultException e) {
 			System.out.println("No lecture found with the specified id: " + id);
+			return Response.status(204).build();
+		}
+	}
+	
+	@DELETE
+	@Path("/{id}")
+	public Response delete(@DefaultValue("0") @PathParam("id") int id) {
+		try {
+			Lecture lectureToDelete = (Lecture) lectureService.findById(id);
+			lectureService.delete(lectureToDelete);
+			return Response.status(200).build();
+		} catch (NoResultException e) {
+			System.out.println("No lecture was found with the specified id: " + id);
 			return Response.status(204).build();
 		}
 	}

@@ -13,6 +13,7 @@ public class StudentViewModel {
 	private String lastName;
 	private String email;
 	private String password;
+	private List<String> courseNames;
 	
 	public StudentViewModel() {
 		
@@ -55,5 +56,13 @@ public class StudentViewModel {
 	}
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public List<String> getCourseNames() {
+		return courseNames;
+	}
+
+	public void setCourseNames(List<String> courseNames) {
+		this.courseNames = courseNames;
 	}
 }

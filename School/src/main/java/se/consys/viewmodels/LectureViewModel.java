@@ -4,12 +4,14 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 public class LectureViewModel {
+	private int id;
 	private String courseName;
 	private LocalDateTime timeStamp;
 	private String lectureRoom;
 	private Set<String> teacherNames;
 	
-	public LectureViewModel(String courseName, LocalDateTime timeStamp, String lectureRoom) {
+	public LectureViewModel(int id, String courseName, LocalDateTime timeStamp, String lectureRoom) {
+		this.setId(id);
 		this.setCourseName(courseName);
 		this.setTimeStamp(timeStamp);
 		this.setLectureRoom(lectureRoom);
@@ -40,6 +42,14 @@ public class LectureViewModel {
 
 	public void setTeacherNames(Set<String> teacherNames) {
 		this.teacherNames = teacherNames;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 	
 }

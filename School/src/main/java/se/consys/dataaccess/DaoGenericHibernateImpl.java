@@ -5,6 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import javax.persistence.NoResultException;
+
 import org.hibernate.Session;
 
 import se.consys.Utilities.Helper;
@@ -93,5 +95,25 @@ public class DaoGenericHibernateImpl<T extends Serializable> implements IGeneric
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			throw new RuntimeException(e.getMessage());
 		}
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public boolean Login(String email, String password) {
+		if (activeClassName == "Teacher" || activeClassName == "Student") {
+			String HQL_LOGIN = "FROM " + activeClassName + " WHERE email:email AND password:password";
+			try {
+				T result = (T) session.createQuery(HQL_LOGIN)
+						.setParameter("password", password)
+						.setParameter("email", email)
+						.setMaxResults(1)
+						.getSingleResult();
+				
+				return true;
+			} catch (NoResultException e) {
+				return false;
+			}
+		}
+		return false;
 	}
 }

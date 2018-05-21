@@ -19,6 +19,13 @@ public class CourseViewModel {
 	private Map<LocalDateTime, Lecture> scheduledLectures;
 	private List<StudentViewModel> students;
 	
+	public CourseViewModel() {}
+	
+	public CourseViewModel(int id, String courseName) {
+		this.setId(id);
+		this.setCourseName(courseName);
+	}
+	
 	public int getId() {
 		return id;
 	}

@@ -42,6 +42,11 @@ public class GenericService<T extends Serializable> implements IGenericDao<T> {
 	public List<T> findAll() {
 		 return dao.findAll();
 	}
+	
+	@Override
+	public boolean Login(String email, String password) {
+		return dao.Login(email, password);
+	}
 
 	public IGenericDao getDao() {
 		return dao;
@@ -55,5 +60,7 @@ public class GenericService<T extends Serializable> implements IGenericDao<T> {
 	public void removeReference(T entity, Class<?> reference) {
 		this.dao.removeReference(entity, reference);
 	}
+
+
 
 }

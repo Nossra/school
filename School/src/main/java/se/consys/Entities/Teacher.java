@@ -29,7 +29,11 @@ public class Teacher implements Serializable {
 	private String password;
 	@ManyToMany(mappedBy = "qualifiedTeachers", fetch = FetchType.LAZY)
 	private Set<Subject> qualifications;
-	@ManyToMany(mappedBy = "supervisors", fetch = FetchType.LAZY)
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(
+			name = "Course_Teacher",
+			joinColumns = @JoinColumn(name="Course_Id", referencedColumnName="id"),
+			inverseJoinColumns = @JoinColumn(name="Teacher_Id", referencedColumnName="id"))
 	private Set<Course> supervisedCourses;
 	@ManyToMany(mappedBy = "teachers", fetch = FetchType.LAZY)
 	private Set<Lecture> lectures;

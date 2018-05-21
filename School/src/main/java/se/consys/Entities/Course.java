@@ -43,8 +43,10 @@ public class Course implements Serializable {
 			joinColumns = @JoinColumn(name="course_id", referencedColumnName="id"),
 			inverseJoinColumns = @JoinColumn(name="teacher_id", referencedColumnName="id"))
 	private Set<Teacher> supervisors;
-	@ElementCollection
-	private Map<LocalDateTime, Lecture> scheduledLectures;
+	
+//	Removed as it doesnt make sense to keep it in, might re-add later on for practice purposes
+//	@ElementCollection
+//	private Map<LocalDateTime, Lecture> scheduledLectures;
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(
 		name = "Course_Student",
@@ -73,12 +75,12 @@ public class Course implements Serializable {
 	public void setStudents(List<Student> students) {
 		this.students = students;
 	}
-	public Map<LocalDateTime, Lecture> getScheduledLectures() {
-		return scheduledLectures;
-	}
-	public void setScheduledLectures(Map<LocalDateTime, Lecture> scheduledLectures) {
-		this.scheduledLectures = scheduledLectures;
-	}
+//	public Map<LocalDateTime, Lecture> getScheduledLectures() {
+//		return scheduledLectures;
+//	}
+//	public void setScheduledLectures(Map<LocalDateTime, Lecture> scheduledLectures) {
+//		this.scheduledLectures = scheduledLectures;
+//	}
 	public int getDurationInMonths() {
 		return durationInMonths;
 	}

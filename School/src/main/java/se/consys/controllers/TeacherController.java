@@ -19,6 +19,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import se.consys.Entities.Course;
 import se.consys.Entities.Lecture;
@@ -74,6 +75,7 @@ public class TeacherController {
 				Set<LectureViewModel> lecturesViewModelSet = new HashSet<LectureViewModel>();
 				for (Lecture lectures : allTeachers.get(i).getLectures()) {
 					LectureViewModel lvm = new LectureViewModel(
+							lectures.getId(),
 							lectures.getCourse().getCourseName(), 
 							lectures.getTimeOfLecture(), 
 							lectures.getLectureRoom());
@@ -88,7 +90,7 @@ public class TeacherController {
 	
 	@GET
 	@Path("/{id}")
-	public Response getById(@PathParam("id") int id) {
+	public Response getById(@DefaultValue("0") @PathParam("id") int id) {
 		try {
 			Teacher teacher = (Teacher) teacherService.findById(id);
 			TeacherViewModel tvm = new TeacherViewModel(
@@ -102,6 +104,7 @@ public class TeacherController {
 				Set<LectureViewModel> lvmSet = new HashSet<LectureViewModel>();
 				for (Lecture lectures : teacher.getLectures()) {
 					LectureViewModel lvm = new LectureViewModel(
+							lectures.getId(),
 							lectures.getCourse().getCourseName(),
 							lectures.getTimeOfLecture(), 
 							lectures.getLectureRoom());
@@ -138,6 +141,18 @@ public class TeacherController {
 		return Response.status(201).entity(entity).build();
 	}
 	
+	@POST
+	@Path("/{login}")
+	public Response login(Teacher teacher) {
+		boolean valid = teacherService.Login(teacher.getEmail(), teacher.getPassword());
+		if (valid) {
+			return Response.status(200).build(); 
+		} else {
+			System.out.println("Credentials invalid, try again.");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+	}
+	
 	@PATCH
 	@Path("/{id}")
 	public Response update(
@@ -161,38 +176,55 @@ public class TeacherController {
 			
 			// Lectures
 			if (!lectureString.equals("")) {
-				List<Integer> lectureIds = SetHelper.separateIds(lectureString);
-				Set<Lecture> lectures = new HashSet<Lecture>();
-				for (int i = 0; i < lectureIds.size(); i++) {
-					Lecture lecture = (Lecture) lectureService.findById(lectureIds.get(i));
-					lectures.add(lecture);
+				try {
+					List<Integer> lectureIds = SetHelper.separateIds(lectureString);
+					Set<Lecture> lectures = new HashSet<Lecture>();
+					for (int i = 0; i < lectureIds.size(); i++) {
+						Lecture lecture = (Lecture) lectureService.findById(lectureIds.get(i));
+						lectures.add(lecture);
+					}
+					teacherToBeUpdated.setLectures(lectures);
+				} catch (NoResultException e) {
+					System.out.println("One or more of the sent ids did not match any of the lectures.");
+					return Response.status(204).build();
 				}
-				teacherToBeUpdated.setLectures(lectures);
 			}
 			
 			// Courses
 			if (!coursesString.equals("")) {
-				List<Integer> courseIds = SetHelper.separateIds(coursesString);
-				Set<Course> courses = new HashSet<Course>();
-				for (int i = 0; i < courseIds.size(); i++) {
-					Course course = (Course) courseService.findById(courseIds.get(i));
-					courses.add(course);
+				try {
+					System.out.println("är jag rätt?");
+					List<Integer> courseIds = SetHelper.separateIds(coursesString);
+					Set<Course> courses = new HashSet<Course>();
+					for (int i = 0; i < courseIds.size(); i++) {
+						Course course = (Course) courseService.findById(courseIds.get(i));
+						courses.add(course);
+						System.out.println(course.getCourseName());
+					}
+					teacherToBeUpdated.setSupervisedCourses(courses);
+				} catch (NoResultException e) {
+					System.out.println("One or more of the ids sent did not match any of the courses.");
+					return Response.status(204).build();
 				}
-				teacherToBeUpdated.setSupervisedCourses(courses);
 			}
 			
 			// Qualifications
 			if (!qualificationsString.equals("")) {
-				List<Integer> qualificationIds = SetHelper.separateIds(qualificationsString);
-				Set<Subject> subjects = new HashSet<Subject>();
-				Set<String> subjectNames = new HashSet<String>();
-				for (int i = 0; i < qualificationIds.size(); i++) {
-					Subject subject = (Subject) subjectService.findById(qualificationIds.get(i));
-					subjectNames.add(subject.getSubjectName());
-					subjects.add(subject);
+				try {
+					List<Integer> qualificationIds = SetHelper.separateIds(qualificationsString);
+					Set<Subject> subjects = new HashSet<Subject>();
+					Set<String> subjectNames = new HashSet<String>();
+					for (int i = 0; i < qualificationIds.size(); i++) {
+						Subject subject = (Subject) subjectService.findById(qualificationIds.get(i));
+						subjectNames.add(subject.getSubjectName());
+						subjects.add(subject);
+					}
+					tvm.setSubjectNames(subjectNames);
+					teacherToBeUpdated.setQualifications(subjects);
+				} catch (NoResultException e) {
+					System.out.println("One or more of the ids sent did not match any of the subjects");
+					return Response.status(204).build();
 				}
-				tvm.setSubjectNames(subjectNames);
-				teacherToBeUpdated.setQualifications(subjects);
 			}	
 			
 			tvm.setId(teacherToBeUpdated.getId());
@@ -201,11 +233,6 @@ public class TeacherController {
 			tvm.setEmail(teacherToBeUpdated.getEmail());
 			tvm.setPhoneNumber(teacherToBeUpdated.getPhoneNumber());
 			tvm.setPassword(teacherToBeUpdated.getPassword());
-			
-			for (Subject s : teacherToBeUpdated.getQualifications()) {
-				System.out.println(s.getSubjectName());
-			}
-			
 			teacherService.update(teacherToBeUpdated);
 			return Response.status(200).entity(tvm).build();
 		} catch (NoResultException e) {

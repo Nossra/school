@@ -21,7 +21,6 @@ public class Subject implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 	private String subjectName;
-	@Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(
 		name = "Subject_Teacher",
